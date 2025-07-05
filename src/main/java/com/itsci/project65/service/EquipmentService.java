@@ -7,4 +7,5 @@ public interface EquipmentService {
     public Equipment updateEquipment(Equipment equipment);
     public Equipment getEquipmentById(int equipmentId);
     public void deleteEquipment(int equipmentId);
+    //testproject
 }
