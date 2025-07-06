@@ -42,10 +42,10 @@ public class EquipmentOwner {
     @Column(name = "ownerGender", nullable = false)
     private String ownerGender;
 
-    private LocalDateTime ownerDOB;
+    private String ownerDOB;
 
     @Column(name = "ownerTel", length = 10, nullable = false)
-    private int ownerTel;
+    private String ownerTel;
 
     @Column(name = "ownerHouseNumber", length = 30, nullable = false)
     private String ownerHouseNumber;

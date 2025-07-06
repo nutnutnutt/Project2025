@@ -25,7 +25,7 @@ public class Delivery {
     @Column(name = "updateStatus", length = 50)
     private String updateStatus;
 
-    private LocalDateTime deliveryPickUpDate;
+    private String deliveryPickUpDate;
 
     @Column(name = "returnStatus", length = 50)
     private String returnStatus;

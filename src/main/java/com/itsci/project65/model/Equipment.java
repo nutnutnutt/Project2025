@@ -56,4 +56,7 @@ public class Equipment {
 
     @OneToMany(mappedBy = "equipment", cascade = CascadeType.ALL)
     private List<EquipmentType> equipmentTypes;
+
+    public void setOwner_id(int ownerId) {
+    }
 }

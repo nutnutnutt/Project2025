@@ -18,11 +18,12 @@ import java.util.List;
 
 public class Booking {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int bookingId;
 
-    private LocalDateTime bookingstartDate;
+    private String bookingstartDate;
 
-    private LocalDateTime bookingendDate;
+    private String bookingendDate;
 
     @Column(name = "bookingchangeAddress", length = 255)
     private String bookingchangeAddress;
