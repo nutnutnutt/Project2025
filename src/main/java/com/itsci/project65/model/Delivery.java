@@ -32,6 +32,7 @@ public class Delivery {
 
     @OneToOne
     @JoinColumn(name = "booking_id")
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private Booking booking;
 
     @ManyToOne

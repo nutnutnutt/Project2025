@@ -52,6 +52,7 @@ public class Equipment {
     private EquipmentOwner equipmentOwner;
 
     @ManyToMany(mappedBy = "equipmentList")
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private List<Booking> booking;
 
     @OneToMany(mappedBy = "equipment", cascade = CascadeType.ALL)

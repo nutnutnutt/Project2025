@@ -7,5 +7,5 @@ public interface FarmerService {
     public Farmer updateFarmer(Farmer farmer);
     public Farmer getFarmerById(int farmerId);
     public void deleteFarmer(int farmerId);
-
+    public Farmer login(String username, String password);
 }

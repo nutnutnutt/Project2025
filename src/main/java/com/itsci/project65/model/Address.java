@@ -32,5 +32,6 @@ public class Address {
     private Farmer farmer;
 
     @OneToMany(mappedBy = "address")
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private List<Delivery> delivery;
 }

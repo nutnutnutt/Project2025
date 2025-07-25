@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+import org.springframework.transaction.annotation.Transactional;
+
 @Service
 public class BookingServiceImpl implements BookingService {
 
@@ -20,10 +22,19 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
+    @Transactional
     public Booking updateBooking(Booking booking) {
-        Optional<Booking> existingBooking = bookingRepository.findById(booking.getBookingId());
-        if (existingBooking.isPresent()) {
-            return bookingRepository.save(booking);
+        Optional<Booking> optionalBooking = bookingRepository.findById(booking.getBookingId());
+        if (optionalBooking.isPresent()) {
+            Booking existingBooking = optionalBooking.get();
+            existingBooking.setBookingstartDate(booking.getBookingstartDate());
+            existingBooking.setBookingendDate(booking.getBookingendDate());
+            existingBooking.setBookingchangeAddress(booking.getBookingchangeAddress());
+            existingBooking.setBookingstatus(booking.getBookingstatus());
+            existingBooking.setBookingList(booking.getBookingList());
+            existingBooking.setFarmer(booking.getFarmer());
+            existingBooking.setEquipmentList(booking.getEquipmentList());
+            return bookingRepository.save(existingBooking);
         } else {
             throw new RuntimeException("ไม่พบข้อมูลการจองที่ต้องการแก้ไข (ID: " + booking.getBookingId() + ")");
         }

@@ -3,6 +3,7 @@ package com.itsci.project65.service.impl;
 import com.itsci.project65.model.Farmer;
 import com.itsci.project65.repository.FarmerRepository;
 import com.itsci.project65.service.FarmerService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -10,6 +11,8 @@ import org.springframework.stereotype.Service;
 public class FarmerServiceImpl implements FarmerService {
     @Autowired
     FarmerRepository farmerRepository;
+
+    
 
     @Override
     public Farmer createFarmer(Farmer farmer) {
@@ -30,5 +33,14 @@ public class FarmerServiceImpl implements FarmerService {
     public void deleteFarmer(int farmerId) {
         Farmer existingFarmer = farmerRepository.getReferenceById(farmerId);
         farmerRepository.delete(existingFarmer);
+    }
+
+    @Override
+    public Farmer login(String username, String password) {
+        Farmer farmer = farmerRepository.findByFarmerUserName(username);
+        if (farmer != null && farmer.getFarmerPassword() != null && farmer.getFarmerPassword().equals(password)) {
+            return farmer;
+        }
+        return null;
     }
 }

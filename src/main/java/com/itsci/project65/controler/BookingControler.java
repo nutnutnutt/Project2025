@@ -42,21 +42,9 @@ public class BookingControler {
     @PutMapping("/update/{id}")
     public ResponseEntity<?> updateBooking(@PathVariable("id") int id, @RequestBody Booking booking) {
         try {
-            Booking existingBooking = bookingService.getBookingById(id);
-            if (existingBooking == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("ไม่พบข้อมูลการจองที่ต้องการแก้ไข");
-            }
-
-            existingBooking.setBookingendDate(booking.getBookingendDate());
-            existingBooking.setBookingstartDate(booking.getBookingstartDate());
-            existingBooking.setBookingList(booking.getBookingList());
-            existingBooking.setBookingchangeAddress(booking.getBookingchangeAddress());
-            existingBooking.setBookingstatus(booking.getBookingstatus());
-            existingBooking.setFarmer(booking.getFarmer());
-
-            Booking updatedBooking = bookingService.updateBooking(existingBooking);
+            booking.setBookingId(id);
+            Booking updatedBooking = bookingService.updateBooking(booking);
             return new ResponseEntity<>(updatedBooking, HttpStatus.OK);
-
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (Exception e) {
