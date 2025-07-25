@@ -3,6 +3,9 @@ package com.itsci.project65.service.impl;
 import com.itsci.project65.model.EquipmentOwner;
 import com.itsci.project65.repository.EquipmentOwnerRepository;
 import com.itsci.project65.service.EquipmentOwnerService;
+import com.itsci.project65.dto.OwnerLoginRequest;
+import com.itsci.project65.dto.OwnerLoginResponse;
+import com.itsci.project65.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +16,9 @@ public class EquipmentOwnerServiceImpl implements EquipmentOwnerService {
 
     @Autowired
     private EquipmentOwnerRepository equipmentOwnerRepository;
+    
+    @Autowired
+    private JwtUtil jwtUtil;
 
     @Override
     public EquipmentOwner createEquipmentOwner(EquipmentOwner equipmentOwner) {
@@ -42,6 +48,27 @@ public class EquipmentOwnerServiceImpl implements EquipmentOwnerService {
             equipmentOwnerRepository.delete(existingOwner.get());
         } else {
             throw new RuntimeException("ไม่พบเจ้าของอุปกรณ์ที่ต้องการลบ (ID: " + ownerId + ")");
+        }
+    }
+
+    @Override
+    public EquipmentOwner login(String ownerUserName, String ownerPassword) {
+        EquipmentOwner owner = equipmentOwnerRepository.findByOwnerUserName(ownerUserName);
+        if (owner != null && owner.getOwnerPassword() != null && owner.getOwnerPassword().equals(ownerPassword)) {
+            return owner;
+        }
+        return null;
+    }
+
+    @Override
+    public OwnerLoginResponse authenticateAndGenerateToken(OwnerLoginRequest ownerLoginRequest) {
+        EquipmentOwner owner = login(ownerLoginRequest.getOwnerUserName(), ownerLoginRequest.getOwnerPassword());
+        
+        if (owner != null) {
+            String token = jwtUtil.generateToken(owner.getOwnerUserName(), owner.getOwnerId());
+            return new OwnerLoginResponse(token, owner.getOwnerId(), owner.getOwnerUserName(), "เข้าสู่ระบบสำเร็จ");
+        } else {
+            throw new RuntimeException("ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง");
         }
     }
 }

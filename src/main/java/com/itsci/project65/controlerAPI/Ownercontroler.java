@@ -1,12 +1,11 @@
 package com.itsci.project65.controlerAPI;
 
-
 import jakarta.validation.Valid;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import com.itsci.project65.model.Farmer;
-import com.itsci.project65.service.FarmerService;
-import com.itsci.project65.dto.LoginRequest;
-import com.itsci.project65.dto.LoginResponse;
+import com.itsci.project65.model.EquipmentOwner;
+import com.itsci.project65.service.EquipmentOwnerService;
+import com.itsci.project65.dto.OwnerLoginRequest;
+import com.itsci.project65.dto.OwnerLoginResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,16 +16,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/farmer")
-public class Farmercontroler {
+@RequestMapping("/api/owner")
+public class Ownercontroler {
 
     @Autowired
-    private FarmerService farmerService;
+    private EquipmentOwnerService equipmentOwnerService;
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<?> login(@Valid @RequestBody OwnerLoginRequest ownerLoginRequest) {
         try {
-            LoginResponse response = farmerService.authenticateAndGenerateToken(loginRequest);
+            OwnerLoginResponse response = equipmentOwnerService.authenticateAndGenerateToken(ownerLoginRequest);
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (RuntimeException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
@@ -34,15 +33,13 @@ public class Farmercontroler {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<String> register(@Valid @RequestBody Farmer farmer) {
-        farmerService.createFarmer(farmer);
-        return new ResponseEntity<>("สมัครสมาชิกเรียบร้อยเเล้ว", HttpStatus.CREATED);
+    public ResponseEntity<String> register(@Valid @RequestBody EquipmentOwner equipmentOwner) {
+        equipmentOwnerService.createEquipmentOwner(equipmentOwner);
+        return new ResponseEntity<>("สมัครสมาชิกเรียบร้อยแล้ว", HttpStatus.CREATED);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<String> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        return new ResponseEntity<>("กรุณา กรอกข้อมูลให้ครบ", HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>("กรุณากรอกข้อมูลให้ครบ", HttpStatus.BAD_REQUEST);
     }
 }
-
-
