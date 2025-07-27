@@ -1,21 +1,28 @@
 package com.itsci.project65.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
-import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 @Entity
 @Table(name="equipment_owner")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIgnoreProperties({"hibernateLazyInitializer","handler"})
-
-public class EquipmentOwner {
+public class EquipmentOwner implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ownerId", length = 20)
@@ -65,7 +72,46 @@ public class EquipmentOwner {
     @Column(name = "ownerProvince", length = 30, nullable = false)
     private String ownerProvince;
 
-    @Column(name = "ownerPostalCode", length = 5, nullable = false)
+        @Column(name = "ownerPostalCode", length = 5, nullable = false)
     private String ownerPostalCode;
 
+    @OneToMany(mappedBy = "equipmentOwner", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference
+    private List<Equipment> equipments;
+
+    // UserDetails methods
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return Collections.singletonList(new SimpleGrantedAuthority("ROLE_OWNER"));
+    }
+
+    @Override
+    public String getPassword() {
+        return ownerPassword;
+    }
+
+    @Override
+    public String getUsername() {
+        return ownerUserName;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
 }

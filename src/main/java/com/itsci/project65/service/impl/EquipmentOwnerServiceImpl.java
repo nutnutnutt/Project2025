@@ -65,7 +65,7 @@ public class EquipmentOwnerServiceImpl implements EquipmentOwnerService {
         EquipmentOwner owner = login(ownerLoginRequest.getOwnerUserName(), ownerLoginRequest.getOwnerPassword());
         
         if (owner != null) {
-            String token = jwtUtil.generateToken(owner.getOwnerUserName(), owner.getOwnerId());
+            String token = jwtUtil.generateTokenForOwner(owner.getOwnerUserName(), owner.getOwnerId());
             return new OwnerLoginResponse(token, owner.getOwnerId(), owner.getOwnerUserName(), "เข้าสู่ระบบสำเร็จ");
         } else {
             throw new RuntimeException("ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง");

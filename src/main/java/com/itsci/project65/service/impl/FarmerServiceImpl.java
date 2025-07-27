@@ -58,7 +58,7 @@ public class FarmerServiceImpl implements FarmerService {
         Farmer farmer = login(loginRequest.getFarmerUserName(), loginRequest.getFarmerPassword());
         
         if (farmer != null) {
-            String token = jwtUtil.generateToken(farmer.getFarmerUserName(), farmer.getFarmerId());
+            String token = jwtUtil.generateTokenForFarmer(farmer.getFarmerUserName(), farmer.getFarmerId());
             return new LoginResponse(token, farmer.getFarmerId(), farmer.getFarmerUserName(), "เข้าสู่ระบบสำเร็จ");
         } else {
             throw new RuntimeException("ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง");

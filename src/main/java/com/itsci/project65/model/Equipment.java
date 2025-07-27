@@ -1,5 +1,7 @@
 package com.itsci.project65.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -47,8 +49,9 @@ public class Equipment {
     @Column(name = "viewsReviews", length = 255)
     private String viewsReviews;
 
-    @ManyToOne
+        @ManyToOne
     @JoinColumn(name = "owner_id")
+    @JsonBackReference
     private EquipmentOwner equipmentOwner;
 
     @ManyToMany(mappedBy = "equipmentList")
@@ -56,8 +59,7 @@ public class Equipment {
     private List<Booking> booking;
 
     @OneToMany(mappedBy = "equipment", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private List<EquipmentType> equipmentTypes;
 
-    public void setOwner_id(int ownerId) {
-    }
 }

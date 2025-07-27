@@ -5,7 +5,7 @@ import com.itsci.project65.model.Equipment;
 import java.util.List;
 
 public interface EquipmentService {
-    public Equipment createEquipment(Equipment equipment);
+        Equipment createEquipment(Equipment equipment, org.springframework.web.multipart.MultipartFile file);
     public Equipment updateEquipment(Equipment equipment);
     public Equipment getEquipmentById(int equipmentId);
     public void deleteEquipment(int equipmentId);

@@ -1,7 +1,11 @@
 package com.itsci.project65.controler;
 
 import com.itsci.project65.model.Equipment;
+import com.itsci.project65.model.EquipmentType;
+import com.itsci.project65.model.EquipmentOwner;
+import com.itsci.project65.repository.EquipmentOwnerRepository;
 import com.itsci.project65.service.EquipmentService;
+import com.itsci.project65.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -9,8 +13,13 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/equipment")
@@ -19,56 +28,99 @@ public class EquipmentControler {
     @Autowired
     private EquipmentService equipmentService;
 
-    private final String IMAGE_UPLOAD_DIR = System.getProperty("user.dir") + "/images/"; // กำหนดโฟลเดอร์เก็บรูปภาพ
+    @Autowired
+    private JwtUtil jwtUtil;
+
+    @Autowired
+    private EquipmentOwnerRepository equipmentOwnerRepository;
+
+    @Autowired
+    private com.itsci.project65.repository.EquipmentRepository equipmentRepository;
+
+    private final String IMAGE_UPLOAD_DIR = System.getProperty("user.dir") + "/uploads/images/";
 
 
     @PostMapping("/create")
-    public ResponseEntity<?> createEquipment(
+    public ResponseEntity<Map<String, Object>> createEquipment(
             @RequestParam("equipmentName") String equipmentName,
-            @RequestParam("equipmentDetails") String equipmentDetails,
-            @RequestParam("equipmentFeature") String equipmentFeature,
-            @RequestParam("equipmentList") String equipmentList,
-            @RequestParam("equipmentAddress") String equipmentAddress,
+            @RequestParam("category") String category,
+            @RequestParam("properties") String properties,
+            @RequestParam("description") String description,
+            @RequestParam("address") String address,
             @RequestParam("price") double price,
-            @RequestParam("equipmentStatus") String equipmentStatus,
-            @RequestParam("owner_id") int ownerId,
-            @RequestParam(value = "equipmentImg", required = false) MultipartFile file
+            @RequestParam(value = "image", required = false) MultipartFile file,
+            @RequestHeader("Authorization") String authHeader
     ) {
+        Map<String, Object> response = new HashMap<>();
         try {
-            String fileName = null;
+            // 1. Extract token and find owner
+            String token = authHeader.substring(7);
+            String ownerUserName = jwtUtil.extractUsername(token);
+            EquipmentOwner owner = equipmentOwnerRepository.findByOwnerUserName(ownerUserName);
 
-            if (file != null && !file.isEmpty()) {
-                fileName = System.currentTimeMillis() + "_" + StringUtils.cleanPath(file.getOriginalFilename());
-                File uploadDir = new File(IMAGE_UPLOAD_DIR);
-                if (!uploadDir.exists()) {
-                    uploadDir.mkdirs();
-                }
-                file.transferTo(new File(IMAGE_UPLOAD_DIR + fileName));
+            if (owner == null) {
+                response.put("status", "error");
+                response.put("message", "Invalid token or owner not found.");
+                return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
             }
 
+            // 2. Prepare Equipment object
             Equipment equipment = new Equipment();
             equipment.setEquipmentName(equipmentName);
-            equipment.setEquipmentDetails(equipmentDetails);
-            equipment.setEquipmentFeature(equipmentFeature);
-            equipment.setEquipmentList(equipmentList);
-            equipment.setEquipmentAddress(equipmentAddress);
+            equipment.setEquipmentDetails(description);
+            equipment.setEquipmentFeature(properties);
+            equipment.setEquipmentList(category);
+            equipment.setEquipmentAddress(address);
             equipment.setPrice((int) price);
-            equipment.setEquipmentStatus(equipmentStatus);
-            equipment.setOwner_id(ownerId);
-            equipment.setEquipmentImg(fileName);
+            equipment.setEquipmentStatus("Available");
+            equipment.setEquipmentOwner(owner);
 
-            Equipment createdEquipment = equipmentService.createEquipment(equipment);
-            return new ResponseEntity<>(createdEquipment, HttpStatus.CREATED);
+            // 3. Prepare EquipmentType
+            EquipmentType equipmentType = new EquipmentType();
+            equipmentType.setEquipmentTypeName(category);
+            equipmentType.setEquipment(equipment);
+            equipment.setEquipmentTypes(Collections.singletonList(equipmentType));
 
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("File Upload Error: " + e.getMessage());
+            // 4. Delegate creation and file upload to the transactional service
+            Equipment savedEquipment = equipmentService.createEquipment(equipment, file);
+
+            // 5. Build success response
+            response.put("status", "success");
+            response.put("message", "Equipment created successfully!");
+            response.put("equipment", savedEquipment);
+            return new ResponseEntity<>(response, HttpStatus.CREATED);
+
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
+            response.put("status", "error");
+            response.put("message", "Error creating equipment: " + e.getMessage());
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/my-equipment")
+    public ResponseEntity<List<Equipment>> getOwnerEquipment(@RequestHeader("Authorization") String authHeader) {
+        try {
+            String token = authHeader.substring(7);
+            String ownerUserName = jwtUtil.extractUsername(token);
+            EquipmentOwner owner = equipmentOwnerRepository.findByOwnerUserName(ownerUserName);
+
+            if (owner == null) {
+                // Return 401 Unauthorized if the token is invalid or owner doesn't exist
+                return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            }
+
+            List<Equipment> equipments = equipmentRepository.findByEquipmentOwner(owner);
+            return new ResponseEntity<>(equipments, HttpStatus.OK);
+
+        } catch (Exception e) {
+            // Log the exception for debugging purposes
+            System.err.println("Error fetching owner equipment: " + e.getMessage());
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
 
-    @GetMapping("/{id}")
+    @GetMapping("/get/{id}")
     public ResponseEntity<?> getEquipmentById(@PathVariable("id") int id) {
         try {
             Equipment equipment = equipmentService.getEquipmentById(id);
@@ -91,17 +143,24 @@ public class EquipmentControler {
             @RequestParam("equipmentAddress") String equipmentAddress,
             @RequestParam("price") double price,
             @RequestParam("equipmentStatus") String equipmentStatus,
-            @RequestParam("owner_id") int ownerId,
-            @RequestParam(value = "equipmentImg", required = false) MultipartFile file
+            @RequestParam(value = "image", required = false) MultipartFile file,
+            @RequestHeader("Authorization") String authHeader
     ) {
         try {
+            // 1. Get existing equipment
             Equipment existingEquipment = equipmentService.getEquipmentById(id);
-            if (existingEquipment == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Equipment not found");
+
+            // 2. Verify ownership via JWT
+            String token = authHeader.substring(7);
+            String ownerUserName = jwtUtil.extractUsername(token);
+            EquipmentOwner ownerFromToken = equipmentOwnerRepository.findByOwnerUserName(ownerUserName);
+
+            if (ownerFromToken == null || existingEquipment.getEquipmentOwner().getOwnerId() != ownerFromToken.getOwnerId()) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not authorized to update this equipment.");
             }
 
+            // 3. Handle file upload
             String fileName = existingEquipment.getEquipmentImg();
-
             if (file != null && !file.isEmpty()) {
                 fileName = System.currentTimeMillis() + "_" + StringUtils.cleanPath(file.getOriginalFilename());
                 File uploadDir = new File(IMAGE_UPLOAD_DIR);
@@ -109,8 +168,10 @@ public class EquipmentControler {
                     uploadDir.mkdirs();
                 }
                 file.transferTo(new File(IMAGE_UPLOAD_DIR + fileName));
+                existingEquipment.setEquipmentImg(fileName);
             }
 
+            // 4. Update equipment details
             existingEquipment.setEquipmentName(equipmentName);
             existingEquipment.setEquipmentDetails(equipmentDetails);
             existingEquipment.setEquipmentFeature(equipmentFeature);
@@ -118,9 +179,9 @@ public class EquipmentControler {
             existingEquipment.setEquipmentAddress(equipmentAddress);
             existingEquipment.setPrice((int) price);
             existingEquipment.setEquipmentStatus(equipmentStatus);
-            existingEquipment.setOwner_id(ownerId);
-            existingEquipment.setEquipmentImg(fileName);
+            // The owner is already set and verified, no need to change it.
 
+            // 5. Save updated equipment
             Equipment updatedEquipment = equipmentService.updateEquipment(existingEquipment);
             return new ResponseEntity<>(updatedEquipment, HttpStatus.OK);
 

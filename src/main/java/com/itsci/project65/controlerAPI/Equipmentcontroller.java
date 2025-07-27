@@ -22,7 +22,8 @@ public class Equipmentcontroller {
     public ResponseEntity<Map<String, Object>> addEquipment(@RequestBody Equipment equipment) {
         Map<String, Object> response = new HashMap<>();
         try {
-            Equipment createdEquipment = equipmentService.createEquipment(equipment);
+                        // Passing null for the file as this legacy endpoint doesn't support file uploads.
+            Equipment createdEquipment = equipmentService.createEquipment(equipment, null);
             response.put("success", true);
             response.put("message", "Equipment added successfully");
             response.put("data", createdEquipment);

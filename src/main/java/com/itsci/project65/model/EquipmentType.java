@@ -1,5 +1,6 @@
 package com.itsci.project65.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -23,5 +24,6 @@ public class EquipmentType {
 
     @ManyToOne
     @JoinColumn(name = "equipment_id")
+    @JsonBackReference
     private Equipment equipment;
 }

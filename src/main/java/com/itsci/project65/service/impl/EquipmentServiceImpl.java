@@ -20,14 +20,49 @@ public class EquipmentServiceImpl implements EquipmentService {
     @Autowired
     private EquipmentOwnerRepository equipmentOwnerRepository;
 
+    private final String IMAGE_UPLOAD_DIR = System.getProperty("user.dir") + "/uploads/images/";
+
     @Override
-    public Equipment createEquipment(Equipment equipment) {
-        if (equipment.getEquipmentOwner() != null && equipment.getEquipmentOwner().getOwnerId() > 0) {
-            EquipmentOwner owner = equipmentOwnerRepository.findById(equipment.getEquipmentOwner().getOwnerId())
-                    .orElseThrow(() -> new RuntimeException("Owner not found with id: " + equipment.getEquipmentOwner().getOwnerId()));
-            equipment.setEquipmentOwner(owner);
+    @org.springframework.transaction.annotation.Transactional
+    public Equipment createEquipment(Equipment equipment, org.springframework.web.multipart.MultipartFile file) {
+        // Step 1: Ensure owner is valid and attached
+        if (equipment.getEquipmentOwner() == null || equipment.getEquipmentOwner().getOwnerId() <= 0) {
+            throw new RuntimeException("Owner is required to create equipment.");
         }
-        return equipmentRepository.save(equipment);
+        EquipmentOwner owner = equipmentOwnerRepository.findById(equipment.getEquipmentOwner().getOwnerId())
+                .orElseThrow(() -> new RuntimeException("Owner not found with id: " + equipment.getEquipmentOwner().getOwnerId()));
+        equipment.setEquipmentOwner(owner);
+
+        // Step 2: Save equipment to generate ID (equipmentImg is null at this point)
+        Equipment savedEquipment = equipmentRepository.save(equipment);
+
+        // Step 3: Handle file upload if a file is provided
+        if (file != null && !file.isEmpty()) {
+            try {
+                String originalFileName = org.springframework.util.StringUtils.cleanPath(file.getOriginalFilename());
+                String fileExtension = "";
+                int i = originalFileName.lastIndexOf('.');
+                if (i > 0) {
+                    fileExtension = originalFileName.substring(i);
+                }
+                String newFileName = savedEquipment.getEquipmentId() + fileExtension;
+
+                java.io.File uploadDir = new java.io.File(IMAGE_UPLOAD_DIR);
+                if (!uploadDir.exists()) {
+                    uploadDir.mkdirs();
+                }
+                file.transferTo(new java.io.File(uploadDir, newFileName));
+
+                // Step 4: Set the image name on the entity
+                savedEquipment.setEquipmentImg(newFileName);
+                // No need to call save again, transaction will handle it
+            } catch (java.io.IOException e) {
+                // Using RuntimeException to trigger transaction rollback
+                throw new RuntimeException("Failed to store file: " + e.getMessage());
+            }
+        }
+
+        return savedEquipment;
     }
 
     @Override
