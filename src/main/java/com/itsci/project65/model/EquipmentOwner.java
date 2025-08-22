@@ -3,6 +3,7 @@ package com.itsci.project65.model;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -72,8 +73,11 @@ public class EquipmentOwner implements UserDetails {
     @Column(name = "ownerProvince", length = 30, nullable = false)
     private String ownerProvince;
 
-        @Column(name = "ownerPostalCode", length = 5, nullable = false)
+    @Column(name = "ownerPostalCode", length = 5, nullable = false)
     private String ownerPostalCode;
+
+    @Column(name = "ownerImg", length = 255, nullable = false)
+    private String ownerImg;
 
     @OneToMany(mappedBy = "equipmentOwner", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonManagedReference

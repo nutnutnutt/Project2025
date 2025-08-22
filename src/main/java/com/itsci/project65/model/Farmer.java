@@ -92,6 +92,10 @@ public class Farmer implements UserDetails {
     @Column(name = "farmerPostalCode", length = 5, nullable = false)
     private String farmerPostalCode;
 
+    @NotBlank
+    @Column(name = "farmerImg", length = 255, nullable = false)
+    private String farmerImg;
+
     @JsonIgnore
     @OneToMany(mappedBy = "farmer" ,cascade = CascadeType.ALL)
     private List<Address> address;

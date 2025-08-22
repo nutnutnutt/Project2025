@@ -1,14 +1,11 @@
 package com.itsci.project65.controler;
 
-
 import com.itsci.project65.model.Farmer;
 import com.itsci.project65.service.FarmerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/farmer")
@@ -20,12 +17,12 @@ public class FarmerControler {
     @PostMapping("/create")
     ResponseEntity<?> createFarmer(@RequestBody Farmer farmer){
         try{
-
-            Farmer createFarmer = farmerService.createFarmer(farmer);
-            if (createFarmer == null){
+            // Passing null for the file parameter as this controller does not handle file uploads
+            Farmer createdFarmer = farmerService.createFarmer(farmer, null);
+            if (createdFarmer == null){
                 return new ResponseEntity<>("Cannot add Farmer", HttpStatus.INTERNAL_SERVER_ERROR);
             }
-            return new ResponseEntity<>(createFarmer,HttpStatus.CREATED);
+            return new ResponseEntity<>(createdFarmer,HttpStatus.CREATED);
         }catch (Exception e){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
@@ -44,31 +41,18 @@ public class FarmerControler {
         }
     }
 
-    @PutMapping("/update")
-    ResponseEntity<?> updateFarmer(@RequestBody Farmer farmer){
+    @PutMapping("/update/{id}")
+    ResponseEntity<?> updateFarmer(@PathVariable("id") int id, @RequestBody Farmer farmer){
         try {
-            Farmer exitstingFarmer = farmerService.getFarmerById(farmer.getFarmerId());
+            // The service now handles getting the existing farmer
+            // Passing null for the file parameter
+            Farmer updatedFarmer = farmerService.updateFarmer(id, farmer, null);
 
-            if (exitstingFarmer == null) {
+            if (updatedFarmer == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
             }
-            exitstingFarmer.setFarmerAlley(farmer.getFarmerAlley());
-            exitstingFarmer.setFarmerDistrict(farmer.getFarmerDistrict());
-            exitstingFarmer.setFarmerEmail(farmer.getFarmerEmail());
-            exitstingFarmer.setFarmerDOB(farmer.getFarmerDOB());
-            exitstingFarmer.setFarmerGender(farmer.getFarmerGender());
-            exitstingFarmer.setFarmerFName(farmer.getFarmerFName());
-            exitstingFarmer.setFarmerLName(farmer.getFarmerLName());
-            exitstingFarmer.setFarmerMoo(farmer.getFarmerMoo());
-            exitstingFarmer.setFarmerHouseNumber(farmer.getFarmerHouseNumber());
-            exitstingFarmer.setFarmerProvince(farmer.getFarmerProvince());
-            exitstingFarmer.setFarmerPostalCode(farmer.getFarmerPostalCode());
-            exitstingFarmer.setFarmerSubDistrict(farmer.getFarmerSubDistrict());
-            exitstingFarmer.setFarmerTel(farmer.getFarmerTel());
 
-            Farmer updateFarmer = farmerService.updateFarmer(exitstingFarmer);
-
-            return new ResponseEntity<>(updateFarmer,HttpStatus.OK);
+            return new ResponseEntity<>(updatedFarmer,HttpStatus.OK);
         }catch (Exception e){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
