@@ -25,21 +25,22 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            .csrf(csrf -> csrf.disable())
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(authz -> authz
-                // Public endpoints
-                .requestMatchers("/api/owner/login", "/api/owner/register").permitAll()
-                .requestMatchers("/api/farmer/login", "/api/farmer/register").permitAll()
-                .requestMatchers("/uploads/images/**").permitAll() // Allow public access to images
-                // All other endpoints require authentication
-                .anyRequest().authenticated()
-            )
-            .headers(headers -> headers
-                .frameOptions(frameOptions -> frameOptions.deny())
-                .referrerPolicy(referrerPolicy -> referrerPolicy.policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN))
-            );
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .csrf(csrf -> csrf.disable())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(authz -> authz
+                        // Public endpoints
+                        .requestMatchers("/api/owner/login", "/api/owner/register").permitAll()
+                        .requestMatchers("/api/farmer/login", "/api/farmer/register").permitAll()
+                        .requestMatchers("/uploads/images/**").permitAll() // Allow public access to images
+                        .requestMatchers("/error").permitAll() // Allow public access to error endpoint
+                        // All other endpoints require authentication
+                        .anyRequest().authenticated()
+                )
+                .headers(headers -> headers
+                        .frameOptions(frameOptions -> frameOptions.deny())
+                        .referrerPolicy(referrerPolicy -> referrerPolicy.policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN))
+                );
 
 
         // Add JWT token filter

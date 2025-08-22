@@ -76,7 +76,7 @@ public class EquipmentOwner implements UserDetails {
     @Column(name = "ownerPostalCode", length = 5, nullable = false)
     private String ownerPostalCode;
 
-    @Column(name = "ownerImg", length = 255, nullable = false)
+    @Column(name = "ownerImg", length = 255, nullable = true)
     private String ownerImg;
 
     @OneToMany(mappedBy = "equipmentOwner", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
