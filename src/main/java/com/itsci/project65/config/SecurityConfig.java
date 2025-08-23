@@ -34,6 +34,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/farmer/login", "/api/farmer/register").permitAll()
                         .requestMatchers("/uploads/images/**").permitAll() // Allow public access to images
                         .requestMatchers("/error").permitAll() // Allow public access to error endpoint
+                        .requestMatchers("/api/farmer/image/**").permitAll()
+                        .requestMatchers("/api/farmer/**").permitAll()
                         // All other endpoints require authentication
                         .anyRequest().authenticated()
                 )
