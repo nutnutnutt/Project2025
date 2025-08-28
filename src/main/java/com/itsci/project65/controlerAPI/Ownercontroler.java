@@ -34,6 +34,7 @@ public class Ownercontroler {
 
     @PostMapping("/register")
     public ResponseEntity<String> register(@Valid @RequestBody EquipmentOwner equipmentOwner) {
+
         equipmentOwnerService.createEquipmentOwner(equipmentOwner);
         return new ResponseEntity<>("สมัครสมาชิกเรียบร้อยแล้ว", HttpStatus.CREATED);
     }

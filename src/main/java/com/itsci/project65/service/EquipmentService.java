@@ -11,4 +11,6 @@ public interface EquipmentService {
     public void deleteEquipment(int equipmentId);
     public List<Equipment> getAllEquipments();
 
+    public List<Equipment> getAllByTypeID(int typeId);
+
 }

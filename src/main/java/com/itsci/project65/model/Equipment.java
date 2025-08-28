@@ -25,9 +25,6 @@ public class Equipment {
     @Column(name = "equipmentName", length = 100, nullable = false)
     private String equipmentName;
 
-    @Column(name = "equipmentList", length = 255)
-    private String equipmentList;
-
     @Column(name = "price", length = 10)
     private int price;
 
@@ -49,7 +46,7 @@ public class Equipment {
     @Column(name = "viewsReviews", length = 255)
     private String viewsReviews;
 
-        @ManyToOne
+    @ManyToOne
     @JoinColumn(name = "owner_id")
     @JsonBackReference
     private EquipmentOwner equipmentOwner;
@@ -58,8 +55,9 @@ public class Equipment {
     @com.fasterxml.jackson.annotation.JsonIgnore
     private List<Booking> booking;
 
-    @OneToMany(mappedBy = "equipment", cascade = CascadeType.ALL)
-    @JsonManagedReference
-    private List<EquipmentType> equipmentTypes;
+    @ManyToOne
+    @JoinColumn(name = "equipment_type")
+    @JsonBackReference
+    private EquipmentType equipmentType;
 
 }

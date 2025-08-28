@@ -8,4 +8,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface EquipmentRepository extends JpaRepository<Equipment,Integer> {
     List<Equipment> findByEquipmentOwner(EquipmentOwner owner);
+    List<Equipment> findByEquipmentType_EquipmentTypeId(int equipmentTypeId);
 }

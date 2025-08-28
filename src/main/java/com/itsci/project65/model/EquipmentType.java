@@ -1,11 +1,15 @@
 package com.itsci.project65.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Entity
 @Table(name="equipment_type")
@@ -22,8 +26,9 @@ public class EquipmentType {
     @Column(name = "equipmentTypeName", length = 100, nullable = false)
     private String equipmentTypeName;
 
-    @ManyToOne
-    @JoinColumn(name = "equipment_id")
-    @JsonBackReference
-    private Equipment equipment;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "equipmentType", cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private List<Equipment> equipment;
 }

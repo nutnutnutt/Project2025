@@ -4,15 +4,23 @@ import com.itsci.project65.model.Equipment;
 import com.itsci.project65.model.EquipmentType;
 import com.itsci.project65.model.EquipmentOwner;
 import com.itsci.project65.repository.EquipmentOwnerRepository;
+import com.itsci.project65.repository.EquipmentRepository;
 import com.itsci.project65.service.EquipmentService;
+import com.itsci.project65.service.EquipmentTypeService;
 import com.itsci.project65.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 import java.io.File;
@@ -35,7 +43,10 @@ public class EquipmentControler {
     private EquipmentOwnerRepository equipmentOwnerRepository;
 
     @Autowired
-    private com.itsci.project65.repository.EquipmentRepository equipmentRepository;
+    private EquipmentRepository equipmentRepository;
+
+    @Autowired
+    private EquipmentTypeService equipmentTypeService;
 
     private final String IMAGE_UPLOAD_DIR = System.getProperty("user.dir") + "/uploads/images/";
 
@@ -43,7 +54,7 @@ public class EquipmentControler {
     @PostMapping("/create")
     public ResponseEntity<Map<String, Object>> createEquipment(
             @RequestParam("equipmentName") String equipmentName,
-            @RequestParam("category") String category,
+            @RequestParam("equipmentTypeId") int typeId,
             @RequestParam("properties") String properties,
             @RequestParam("description") String description,
             @RequestParam("address") String address,
@@ -69,18 +80,15 @@ public class EquipmentControler {
             equipment.setEquipmentName(equipmentName);
             equipment.setEquipmentDetails(description);
             equipment.setEquipmentFeature(properties);
-            equipment.setEquipmentList(category);
             equipment.setEquipmentAddress(address);
             equipment.setPrice((int) price);
             equipment.setEquipmentStatus("Available");
             equipment.setEquipmentOwner(owner);
 
             // 3. Prepare EquipmentType
-            EquipmentType equipmentType = new EquipmentType();
-            equipmentType.setEquipmentTypeName(category);
-            equipmentType.setEquipment(equipment);
-            equipment.setEquipmentTypes(Collections.singletonList(equipmentType));
-
+            EquipmentType equipmentType = equipmentTypeService.getEquipmentTypeById(typeId);
+            System.out.println(equipmentType.getEquipmentTypeId());
+            equipment.setEquipmentType(equipmentType);
             // 4. Delegate creation and file upload to the transactional service
             Equipment savedEquipment = equipmentService.createEquipment(equipment, file);
 
@@ -97,6 +105,18 @@ public class EquipmentControler {
         }
     }
 
+    @GetMapping("/all-by-type/{id}")
+    public ResponseEntity<List<Equipment>> getAllEqByTypeId(@PathVariable("id") int id) {
+        try {
+            List<Equipment> equipments = equipmentService.getAllByTypeID(id);
+            return new ResponseEntity<>(equipments, HttpStatus.OK);
+
+        } catch (Exception e) {
+            // Log the exception for debugging purposes
+            System.err.println("Error fetching owner equipment: " + e.getMessage());
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
     @GetMapping("/my-equipment")
     public ResponseEntity<List<Equipment>> getOwnerEquipment(@RequestHeader("Authorization") String authHeader) {
         try {
@@ -175,7 +195,6 @@ public class EquipmentControler {
             existingEquipment.setEquipmentName(equipmentName);
             existingEquipment.setEquipmentDetails(equipmentDetails);
             existingEquipment.setEquipmentFeature(equipmentFeature);
-            existingEquipment.setEquipmentList(equipmentList);
             existingEquipment.setEquipmentAddress(equipmentAddress);
             existingEquipment.setPrice((int) price);
             existingEquipment.setEquipmentStatus(equipmentStatus);
@@ -204,6 +223,30 @@ public class EquipmentControler {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
+        }
+    }
+
+
+    @GetMapping("/image/{filename:.+}")
+    public ResponseEntity<Resource> getImage(@PathVariable String filename) {
+        try {
+            Path imagePath = Paths.get("uploads/images").resolve(filename).normalize();
+            Resource resource = new UrlResource(imagePath.toUri());
+
+            if (resource.exists() && resource.isReadable()) {
+                String contentType = Files.probeContentType(imagePath);
+                if (contentType == null) {
+                    contentType = "application/octet-stream";
+                }
+
+                return ResponseEntity.ok()
+                        .contentType(MediaType.parseMediaType(contentType))
+                        .body(resource);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 }

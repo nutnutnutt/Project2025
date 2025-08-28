@@ -1,5 +1,6 @@
 package com.itsci.project65.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
@@ -80,11 +81,12 @@ public class EquipmentOwner implements UserDetails {
     private String ownerImg;
 
     @OneToMany(mappedBy = "equipmentOwner", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonManagedReference
+    @JsonIgnore
     private List<Equipment> equipments;
 
     // UserDetails methods
     @Override
+    @JsonIgnore
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return Collections.singletonList(new SimpleGrantedAuthority("ROLE_OWNER"));
     }

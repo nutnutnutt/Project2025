@@ -17,6 +17,17 @@ public class EquipmentTypeControler {
     private EquipmentTypeService equipmentTypeService;
 
 
+    @GetMapping("/all")
+    public ResponseEntity<?> getAllEquipmentType(){
+        try{
+            List<EquipmentType> list = equipmentTypeService.getAllEquipmentType();
+
+            return new ResponseEntity<>(list, HttpStatus.OK);
+        }catch (Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("ไม่พบข้อมูล");
+        }
+    }
+
     @PostMapping("/create")
     public ResponseEntity<?> createEquipmentType(@RequestBody EquipmentType equipmentType) {
         try {

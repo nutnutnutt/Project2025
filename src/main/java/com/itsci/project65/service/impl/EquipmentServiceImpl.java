@@ -73,7 +73,6 @@ public class EquipmentServiceImpl implements EquipmentService {
 
             // Update fields from the request
             existingEquipment.setEquipmentName(equipment.getEquipmentName());
-            existingEquipment.setEquipmentList(equipment.getEquipmentList());
             existingEquipment.setPrice(equipment.getPrice());
             existingEquipment.setEquipmentDetails(equipment.getEquipmentDetails());
             existingEquipment.setEquipmentStatus(equipment.getEquipmentStatus());
@@ -113,6 +112,11 @@ public class EquipmentServiceImpl implements EquipmentService {
     @Override
     public List<Equipment> getAllEquipments() {
         return equipmentRepository.findAll();
+    }
+
+    @Override
+    public List<Equipment> getAllByTypeID(int typeId) {
+        return equipmentRepository.findByEquipmentType_EquipmentTypeId(typeId);
     }
 
 

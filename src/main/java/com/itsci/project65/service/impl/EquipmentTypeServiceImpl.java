@@ -46,4 +46,9 @@ public class EquipmentTypeServiceImpl implements EquipmentTypeService {
         }
     }
 
+    @Override
+    public List<EquipmentType> getAllEquipmentType() {
+        return equipmentTypeRepository.findAll();
+    }
+
 }
