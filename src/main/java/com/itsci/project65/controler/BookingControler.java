@@ -1,11 +1,20 @@
 package com.itsci.project65.controler;
 
+import com.itsci.project65.dto.BookingWithEquipmentDTO;
 import com.itsci.project65.model.Booking;
+import com.itsci.project65.model.Equipment;
+import com.itsci.project65.model.EquipmentOwner;
+import com.itsci.project65.request.BookingRequest;
 import com.itsci.project65.service.BookingService;
+import com.itsci.project65.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/booking")
@@ -14,15 +23,24 @@ public class BookingControler {
     @Autowired
     private BookingService bookingService;
 
+    @Autowired
+    private JwtUtil jwtUtil;
 
-    @PostMapping("/create")
-    public ResponseEntity<?> createBooking(@RequestBody Booking booking) {
-        try {
-            Booking createdBooking = bookingService.createBooking(booking);
-            return new ResponseEntity<>(createdBooking, HttpStatus.CREATED);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("ไม่สามารถเพิ่มข้อมูลการจองได้: " + e.getMessage());
-        }
+
+    @PostMapping("/create-with-equipment")
+    public Booking createBookingWithEquipment(@RequestBody BookingRequest request,
+                                              @RequestHeader("Authorization") String authHeader){
+        String token = authHeader.substring(7);
+        int farmerId = jwtUtil.extractFarmerId(token);
+        return bookingService.createBookingWithEquipment(request,farmerId);
+    }
+
+    @GetMapping("/bookings-with-equipment")
+    public List<BookingWithEquipmentDTO> getBookingsWithEquipmentByFarmer(@RequestHeader("Authorization") String authHeader) {
+            String token = authHeader.substring(7);
+            int farmerId = jwtUtil.extractFarmerId(token);
+        List<BookingWithEquipmentDTO> result = bookingService.getBookingWithEquipmentByFarmer(farmerId);
+        return new ResponseEntity<>(result, HttpStatus.OK).getBody();
     }
 
 

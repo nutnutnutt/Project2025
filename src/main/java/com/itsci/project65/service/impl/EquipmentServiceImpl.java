@@ -79,7 +79,6 @@ public class EquipmentServiceImpl implements EquipmentService {
             existingEquipment.setEquipmentFeature(equipment.getEquipmentFeature());
             existingEquipment.setEquipmentAddress(equipment.getEquipmentAddress());
             existingEquipment.setEquipmentImg(equipment.getEquipmentImg());
-            existingEquipment.setViewsReviews(equipment.getViewsReviews());
 
             if (equipment.getEquipmentOwner() != null && equipment.getEquipmentOwner().getOwnerId() > 0) {
                 EquipmentOwner owner = equipmentOwnerRepository.findById(equipment.getEquipmentOwner().getOwnerId())

@@ -25,7 +25,7 @@ public class FarmerServiceImpl implements FarmerService {
     @Autowired
     JwtUtil jwtUtil;
 
-    private final Path root = Paths.get("uploads/images");
+    private final Path root = Paths.get("uploads/farmer");
 
     public FarmerServiceImpl() {
         try {

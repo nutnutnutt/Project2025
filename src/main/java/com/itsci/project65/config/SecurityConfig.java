@@ -30,7 +30,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authz -> authz
                         // Public endpoints
-                        .requestMatchers("/api/owner/login", "/api/owner/register","/equipment-type/all","/equipment-owner/create","/equipment/**","/equipment-type/**","/**/**").permitAll()
+                        .requestMatchers("/api/owner/login", "/api/owner/register","/equipment-type/all","/equipment-owner/create","/equipment/**","/equipment-type/**").permitAll()
                         .requestMatchers("/api/farmer/login", "/api/farmer/register").permitAll()
                         .requestMatchers("/uploads/images/**").permitAll() // Allow public access to images
                         .requestMatchers("/error").permitAll() // Allow public access to error endpoint

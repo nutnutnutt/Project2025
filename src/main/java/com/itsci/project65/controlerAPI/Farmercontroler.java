@@ -40,6 +40,9 @@ public class Farmercontroler {
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (RuntimeException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
+        } catch (Exception e) {
+            // Return the actual exception message for debugging
+            return new ResponseEntity<>("An unexpected error occurred: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -55,34 +58,12 @@ public class Farmercontroler {
 
         try {
             Farmer farmer = objectMapper.readValue(farmerStr, Farmer.class);
-
-            // ตรวจสอบว่ามีไฟล์อัพโหลดมาด้วยไหม
-            if (file != null && !file.isEmpty()) {
-                // กำหนดโฟลเดอร์เก็บไฟล์ (เช่น src/main/resources/static/uploads)
-                String uploadDir = "uploads/farmer";
-                File uploadPath = new File(uploadDir);
-                if (!uploadPath.exists()) {
-                    uploadPath.mkdirs();
-                }
-
-                // ตั้งชื่อไฟล์ (กันชื่อซ้ำ โดยใช้ UUID)
-                String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
-                Path filePath = Paths.get(uploadDir, fileName);
-
-                // เซฟไฟล์ลงเครื่อง
-                Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-
-                // เก็บ path หรือชื่อไฟล์ไว้ใน farmer
-                farmer.setFarmerImg(fileName);
-            } else {
-                farmer.setFarmerImg(null); // ถ้าไม่มีไฟล์
-            }
-
             farmerService.createFarmer(farmer, file);
             return new ResponseEntity<>("สมัครสมาชิกเรียบร้อยแล้ว", HttpStatus.CREATED);
-
         } catch (IOException e) {
             return new ResponseEntity<>("Error parsing farmer data: " + e.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            return new ResponseEntity<>("An unexpected error occurred: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

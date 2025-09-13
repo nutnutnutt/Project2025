@@ -1,6 +1,7 @@
 package com.itsci.project65.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
@@ -8,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -43,17 +45,14 @@ public class Equipment {
     @Column(name = "equipmentImg", length = 255)
     private String equipmentImg;
 
-    @Column(name = "viewsReviews", length = 255)
-    private String viewsReviews;
-
     @ManyToOne
     @JoinColumn(name = "owner_id")
     @JsonBackReference
     private EquipmentOwner equipmentOwner;
 
-    @ManyToMany(mappedBy = "equipmentList")
-    @com.fasterxml.jackson.annotation.JsonIgnore
-    private List<Booking> booking;
+    @JsonIgnore
+    @OneToMany(mappedBy = "equipment", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<BookingEquipment> bookingEquipments = new ArrayList<>();
 
     @ManyToOne
     @JoinColumn(name = "equipment_type")
