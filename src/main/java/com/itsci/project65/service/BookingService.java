@@ -16,6 +16,7 @@ public interface BookingService {
 
     Booking createBookingWithEquipment(BookingRequest request,int farmerId);
     List<BookingWithEquipmentDTO> getBookingWithEquipmentByFarmer(int farmerId);
+    BookingWithEquipmentDTO getBookingWithEquipmentById(int bookingId);
 
 }
 

@@ -15,4 +15,7 @@ public interface BookingEquipmentRepository extends JpaRepository<BookingEquipme
 
     // หา booking ที่จอง equipment ตัวหนึ่ง ๆ
     List<BookingEquipment> findByEquipment_EquipmentId(int equipmentId);
+    
+    // หา booking ที่จองอุปกรณ์ของ owner คนหนึ่ง ๆ
+    List<BookingEquipment> findByEquipment_EquipmentOwner_OwnerId(int ownerId);
 }

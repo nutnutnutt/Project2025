@@ -7,5 +7,6 @@ import java.util.List;
 
 public interface BookingRepository extends JpaRepository<Booking,Integer> {
     List<Booking> findByFarmer_FarmerIdAndBookingstatus(int farmerId, String bookingStatus);
+    List<Booking> findByFarmer_FarmerId(int farmerId);
 
 }

@@ -36,11 +36,15 @@ public class BookingControler {
     }
 
     @GetMapping("/bookings-with-equipment")
-    public List<BookingWithEquipmentDTO> getBookingsWithEquipmentByFarmer(@RequestHeader("Authorization") String authHeader) {
+    public ResponseEntity<List<BookingWithEquipmentDTO>> getBookingsWithEquipmentByFarmer(@RequestHeader("Authorization") String authHeader) {
+        try {
             String token = authHeader.substring(7);
             int farmerId = jwtUtil.extractFarmerId(token);
-        List<BookingWithEquipmentDTO> result = bookingService.getBookingWithEquipmentByFarmer(farmerId);
-        return new ResponseEntity<>(result, HttpStatus.OK).getBody();
+            List<BookingWithEquipmentDTO> result = bookingService.getBookingWithEquipmentByFarmer(farmerId);
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
     }
 
 
@@ -56,6 +60,16 @@ public class BookingControler {
         }
     }
 
+
+    @GetMapping("/bookings-with-equipment/{id}")
+    public ResponseEntity<BookingWithEquipmentDTO> getBookingWithEquipmentById(@PathVariable("id") int id) {
+        try {
+            BookingWithEquipmentDTO result = bookingService.getBookingWithEquipmentById(id);
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
 
     @PutMapping("/update/{id}")
     public ResponseEntity<?> updateBooking(@PathVariable("id") int id, @RequestBody Booking booking) {

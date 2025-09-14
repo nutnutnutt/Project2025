@@ -102,7 +102,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public List<BookingWithEquipmentDTO> getBookingWithEquipmentByFarmer(int farmerId) {
-        List<Booking> bookings = bookingRepository.findByFarmer_FarmerIdAndBookingstatus(farmerId,"pending");
+        List<Booking> bookings = bookingRepository.findByFarmer_FarmerId(farmerId);
         List<BookingWithEquipmentDTO> dtoList = new ArrayList<>();
 
         for (Booking b : bookings) {
@@ -117,22 +117,70 @@ public class BookingServiceImpl implements BookingService {
                     ))
                     .toList();
 
-            BookingWithEquipmentDTO dto = new BookingWithEquipmentDTO(
-                    b.getBookingId(),
-                    b.getBookingstartDate(),
-                    b.getBookingendDate(),
-                    b.getBookingstatus(),
-                    b.getBookingchangeAddress(),
-                    equipmentDTOs
-            );
+            BookingWithEquipmentDTO dto = new BookingWithEquipmentDTO();
+            dto.setBookingId(b.getBookingId());
+            dto.setBookingStartDate(b.getBookingstartDate());
+            dto.setBookingEndDate(b.getBookingendDate());
+            dto.setBookingStatus(b.getBookingstatus());
+            dto.setBookingchangeAddress(b.getBookingchangeAddress());
+            dto.setEquipmentList(equipmentDTOs);
+            
+            // Set farmer information
+            Farmer farmer = b.getFarmer();
+            dto.setFarmerId(farmer.getFarmerId());
+            dto.setFarmerName(farmer.getFarmerFName() + " " + farmer.getFarmerLName());
+            dto.setFarmerTel(farmer.getFarmerTel());
+            
+            // Calculate total price
+            int totalPrice = equipmentDTOs.stream()
+                    .mapToInt(EquipmentDTO::getPrice)
+                    .sum();
+            dto.setTotalPrice(totalPrice);
 
             dtoList.add(dto);
         }
         return dtoList;
     }
 
+    @Override
+    public BookingWithEquipmentDTO getBookingWithEquipmentById(int bookingId) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new RuntimeException("ไม่พบข้อมูลการจอง"));
 
+        List<EquipmentDTO> equipmentDTOs = booking.getBookingEquipments().stream()
+                .map(be -> new EquipmentDTO(
+                        be.getEquipment().getEquipmentId(),
+                        be.getEquipment().getEquipmentName(),
+                        be.getEquipment().getEquipmentDetails(),
+                        be.getEquipment().getEquipmentImg(),
+                        be.getEquipment().getEquipmentFeature(),
+                        be.getEquipment().getPrice()
+                ))
+                .toList();
 
+        BookingWithEquipmentDTO dto = new BookingWithEquipmentDTO();
+        dto.setBookingId(booking.getBookingId());
+        dto.setBookingStartDate(booking.getBookingstartDate());
+        dto.setBookingEndDate(booking.getBookingendDate());
+        dto.setBookingStatus(booking.getBookingstatus());
+        dto.setBookingchangeAddress(booking.getBookingchangeAddress());
+        dto.setEquipmentList(equipmentDTOs);
+        // dto.setPaymentSlipPath(booking.getPaymentSlipPath()); // Remove if field doesn't exist
+        
+        // Set farmer information
+        Farmer farmer = booking.getFarmer();
+        dto.setFarmerId(farmer.getFarmerId());
+        dto.setFarmerName(farmer.getFarmerFName() + " " + farmer.getFarmerLName());
+        dto.setFarmerTel(farmer.getFarmerTel());
+        
+        // Calculate total price
+        int totalPrice = equipmentDTOs.stream()
+                .mapToInt(EquipmentDTO::getPrice)
+                .sum();
+        dto.setTotalPrice(totalPrice);
+
+        return dto;
+    }
 
 }
 

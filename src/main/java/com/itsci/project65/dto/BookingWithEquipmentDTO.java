@@ -18,6 +18,13 @@ public class BookingWithEquipmentDTO {
     private LocalDate bookingEndDate;
     private String bookingStatus;
     private String bookingchangeAddress;
-
+    
+    // Farmer information
+    private int farmerId;
+    private String farmerName;
+    private String farmerTel;
+    
+    // Equipment and pricing
     private List<EquipmentDTO> equipmentList;
+    private int totalPrice;
 }
