@@ -86,6 +86,48 @@ public class OwnerBookingController {
     }
 
     /**
+     * Approve booking request (before payment)
+     * @param bookingId Booking ID
+     * @return Response message
+     */
+    @PutMapping("/bookings/approve-booking/{bookingId}")
+    public ResponseEntity<?> approveBooking(@PathVariable int bookingId) {
+        try {
+            boolean approved = ownerBookingService.updateBookingStatus(bookingId, "confirmed");
+            if (approved) {
+                return ResponseEntity.ok(Map.of("message", "อนุมัติการจองเรียบร้อยแล้ว กรุณารอการชำระเงินจากลูกค้า"));
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("error", "ไม่พบการจองที่ระบุ"));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "ไม่สามารถอนุมัติการจองได้", "message", e.getMessage()));
+        }
+    }
+
+    /**
+     * Reject booking request (before payment)
+     * @param bookingId Booking ID
+     * @return Response message
+     */
+    @PutMapping("/bookings/reject-booking/{bookingId}")
+    public ResponseEntity<?> rejectBooking(@PathVariable int bookingId) {
+        try {
+            boolean rejected = ownerBookingService.updateBookingStatus(bookingId, "cancelled");
+            if (rejected) {
+                return ResponseEntity.ok(Map.of("message", "ปฏิเสธการจองเรียบร้อยแล้ว"));
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("error", "ไม่พบการจองที่ระบุ"));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "ไม่สามารถปฏิเสธการจองได้", "message", e.getMessage()));
+        }
+    }
+
+    /**
      * Approve payment for booking
      * @param bookingId Booking ID
      * @return Response message
