@@ -18,5 +18,7 @@ public interface BookingService {
     List<BookingWithEquipmentDTO> getBookingWithEquipmentByFarmer(int farmerId);
     BookingWithEquipmentDTO getBookingWithEquipmentById(int bookingId);
 
+    List<Integer> getLockedEquipmentIdsNotConfirmed(List<Integer> equipmentIds);
+
 }
 

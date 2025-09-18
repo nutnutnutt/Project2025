@@ -47,6 +47,19 @@ public class BookingControler {
         }
     }
 
+    @GetMapping("/equipment-locked")
+    public ResponseEntity<Map<String, Object>> getLockedEquipmentIds(
+            @RequestParam(required = false) List<Integer> equipmentIds,
+            @RequestHeader("Authorization") String authHeader) {
+
+        List<Integer> locked = bookingService.getLockedEquipmentIdsNotConfirmed(equipmentIds);
+        Map<String, Object> body = new HashMap<>();
+        body.put("lockedEquipmentIds", locked); // คือ eqId ที่มี booking สถานะไม่ใช่ CONFIRMED
+        return ResponseEntity.ok(body);
+    }
+
+
+
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getBookingById(@PathVariable("id") int id) {

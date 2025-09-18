@@ -182,5 +182,14 @@ public class BookingServiceImpl implements BookingService {
         return dto;
     }
 
+    @Override
+    public List<Integer> getLockedEquipmentIdsNotConfirmed(List<Integer> equipmentIds) {
+        String exclude = "confirm";
+        if (equipmentIds == null || equipmentIds.isEmpty()) {
+            return bookingEquipmentRepository.findEquipmentIdsByNotStatus(exclude);
+        }
+        return bookingEquipmentRepository.findEquipmentIdsByNotStatusAndIds(exclude, equipmentIds);
+    }
+
 }
 
