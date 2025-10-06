@@ -29,14 +29,30 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authz -> authz
-                        // Public endpoints
-                        .requestMatchers("/api/owner/login", "/api/owner/register","/equipment-type/all","/equipment-owner/create","/equipment/**","/equipment-type/**","/booking").permitAll()
-                        .requestMatchers("/api/owner/bookings/**").permitAll() // Allow owner booking endpoints
+                        // Public endpoints - เรียงจากเฉพาะเจาะจงไปทั่วไป
+                        .requestMatchers("/api/owner/login", "/api/owner/register").permitAll()
                         .requestMatchers("/api/farmer/login", "/api/farmer/register").permitAll()
-                        .requestMatchers("/uploads/images/**").permitAll() // Allow public access to images
-                        .requestMatchers("/error").permitAll() // Allow public access to error endpoint
-                        .requestMatchers("/api/farmer/image/**").permitAll()
+
+                        // Equipment APIs - เพิ่มครบทุก pattern
+                        .requestMatchers("/api/equipment/**").permitAll()           // ครอบคลุม /api/equipment ทั้งหมด
+                        .requestMatchers("/equipment/**").permitAll()
+                        .requestMatchers("/equipment-type/**").permitAll()
+                        .requestMatchers("/equipment-owner/create").permitAll()
+
+                        // Booking APIs - ใส่ก่อน farmer APIs
+                        .requestMatchers("/api/booking/**").permitAll()            // ครอบคลุม /api/booking ทั้งหมด
+                        .requestMatchers("/booking").permitAll()                   // เดิมที่มีอยู่
+
+                        // Owner APIs
+                        .requestMatchers("/api/owner/bookings/**").permitAll()
+
+                        // Farmer APIs - ใส่ไว้ท้าย
                         .requestMatchers("/api/farmer/**").permitAll()
+
+                        // Static resources
+                        .requestMatchers("/uploads/images/**").permitAll()
+                        .requestMatchers("/error").permitAll()
+
                         // All other endpoints require authentication
                         .anyRequest().authenticated()
                 )
@@ -44,7 +60,6 @@ public class SecurityConfig {
                         .frameOptions(frameOptions -> frameOptions.deny())
                         .referrerPolicy(referrerPolicy -> referrerPolicy.policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN))
                 );
-
 
         // Add JWT token filter
         http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
@@ -64,4 +79,3 @@ public class SecurityConfig {
         return source;
     }
 }
-

@@ -12,6 +12,7 @@ import com.itsci.project65.service.BookingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate; // เพิ่ม import
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -34,10 +35,36 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public Booking createBooking(Booking booking) {
-
-
         return bookingRepository.save(booking);
     }
+
+    // เพิ่ม @Override สำหรับ methods ใหม่
+    @Override
+    public List<Booking> getBookingsByEquipmentAndDateRange(Integer equipmentId, LocalDate startDate, LocalDate endDate) {
+        return bookingRepository.findBookingsByEquipmentAndDateRange(equipmentId, startDate, endDate);
+    }
+
+    /**
+     * ดึงการจองของอุปกรณ์ในเดือนที่กำหนด
+     */
+    @Override
+    public List<Booking> getBookingsByEquipmentAndMonth(Integer equipmentId, LocalDate targetMonth) {
+        LocalDate monthStart = targetMonth.withDayOfMonth(1);
+        LocalDate monthEnd = targetMonth.withDayOfMonth(targetMonth.lengthOfMonth());
+
+        Integer year = targetMonth.getYear();
+        Integer month = targetMonth.getMonthValue();
+
+        System.out.println("Searching bookings for equipment " + equipmentId + " in " + year + "-" + month);
+
+        List<Booking> bookings = bookingRepository.findBookingsByEquipmentAndMonth(
+                equipmentId, year, month, monthStart, monthEnd);
+
+        System.out.println("Found " + bookings.size() + " bookings");
+        return bookings;
+    }
+
+    // ... เก็บ methods เดิมทั้งหมด ...
 
     @Override
     @Transactional
@@ -73,7 +100,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public Booking createBookingWithEquipment(BookingRequest request,int farmerId) {
+    public Booking createBookingWithEquipment(BookingRequest request, int farmerId) {
         Booking booking = new Booking();
         booking.setBookingstartDate(request.getBookingStartDate());
         booking.setBookingendDate(request.getBookingEndDate());
@@ -83,6 +110,7 @@ public class BookingServiceImpl implements BookingService {
         booking.setFarmer(farmer);
 
         booking = bookingRepository.save(booking);
+
         // 2. เพิ่ม BookingEquipment
         for (Integer eqId : request.getEquipmentIds()) {
             Equipment eq = equipmentRepository.findById(eqId)
@@ -124,13 +152,13 @@ public class BookingServiceImpl implements BookingService {
             dto.setBookingStatus(b.getBookingstatus());
             dto.setBookingchangeAddress(b.getBookingchangeAddress());
             dto.setEquipmentList(equipmentDTOs);
-            
+
             // Set farmer information
             Farmer farmer = b.getFarmer();
             dto.setFarmerId(farmer.getFarmerId());
             dto.setFarmerName(farmer.getFarmerFName() + " " + farmer.getFarmerLName());
             dto.setFarmerTel(farmer.getFarmerTel());
-            
+
             // Calculate total price
             int totalPrice = equipmentDTOs.stream()
                     .mapToInt(EquipmentDTO::getPrice)
@@ -165,14 +193,13 @@ public class BookingServiceImpl implements BookingService {
         dto.setBookingStatus(booking.getBookingstatus());
         dto.setBookingchangeAddress(booking.getBookingchangeAddress());
         dto.setEquipmentList(equipmentDTOs);
-        // dto.setPaymentSlipPath(booking.getPaymentSlipPath()); // Remove if field doesn't exist
-        
+
         // Set farmer information
         Farmer farmer = booking.getFarmer();
         dto.setFarmerId(farmer.getFarmerId());
         dto.setFarmerName(farmer.getFarmerFName() + " " + farmer.getFarmerLName());
         dto.setFarmerTel(farmer.getFarmerTel());
-        
+
         // Calculate total price
         int totalPrice = equipmentDTOs.stream()
                 .mapToInt(EquipmentDTO::getPrice)
@@ -190,6 +217,4 @@ public class BookingServiceImpl implements BookingService {
         }
         return bookingEquipmentRepository.findEquipmentIdsByNotStatusAndIds(exclude, equipmentIds);
     }
-
 }
-
